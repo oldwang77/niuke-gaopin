@@ -1,6 +1,4 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.*;
 
 //方法二
 public class nc93 {
@@ -12,45 +10,52 @@ public class nc93 {
      * @return int整型一维数组
      */
 
-    HashMap<Integer, Integer> map = new HashMap<>();//存map
-    LinkedList<Integer> keyList = new LinkedList<Integer>();//存key队列
-
     public int[] LRU(int[][] operators, int k) {
         // write code here
-
-        ArrayList<Integer> list = new ArrayList<>();
+        int length = 0;
+        int index = 0;
         for (int i = 0; i < operators.length; i++) {
-            int opt = operators[i][0], key = operators[i][1];
-            if (keyList.contains(key)) keyList.remove(new Integer(key));
-            keyList.addFirst(key);
-            if (opt == 1) {//set
+            if (operators[i][0] == 2) {
+                length++;
+            }
+        }
+        int[] result = new int[length];
+        Map<Integer, Integer> map = new HashMap();
+        List<Integer> list = new ArrayList();
+        for (int i = 0; i < operators.length; i++) {
+            if (operators[i][0] == 1) {
+                int key = operators[i][1];
                 int value = operators[i][2];
-                if (map.size() == k) {//超过缓存限制
-                    if (map.get(key) == null) {//map中没有key,必须移除最近最少使用key
-                        int k1 = keyList.removeLast();
-                        map.remove(k1, map.get(k1));
-                        map.put(key, value);
+                if (map.size() < k) {
+                    map.put(key, value);
+                    if (list.contains(key)) {
+                        list.remove((Integer) key);
+                    }
+                    list.add(key);
+
+                } else {
+                    if (list.contains(key)) {
+                        list.remove((Integer) key);
+                        list.add(key);
                     } else {
+                        int get_key = list.remove(0);
+                        map.remove(get_key);
+                        list.add(key);
                         map.put(key, value);
                     }
-                } else {//没超过缓存限制
-                    map.put(key, value);
                 }
-            } else if (opt == 2) {//get，不要忘记get后也要将key设为最新
-                if (map.get(key) == null) {
-                    list.add(-1);
+            } else if (operators[i][0] == 2) {
+                int check_key = operators[i][1];
+                if (!map.containsKey(check_key)) {
+                    result[index] = -1;
                 } else {
-                    list.add(map.get(key));
+                    result[index] = map.get(check_key);
+                    list.remove((Integer) check_key);
+                    list.add(check_key);
                 }
+                index++;
             }
-            if (!map.containsKey(key)) keyList.removeFirst();//判断结束后map有没有把key,v加入map,没有就没有这个key,要移除
         }
-        int[] res = new int[list.size()];
-        for (int i = 0; i < res.length; i++) {
-            res[i] = list.get(i);
-        }
-        map.clear();
-        keyList.clear();
-        return res;
+        return result;
     }
 }
