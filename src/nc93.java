@@ -12,46 +12,51 @@ public class nc93 {
 
     public int[] LRU(int[][] operators, int k) {
         // write code here
-        int length = 0;
-        int index = 0;
+        int length = 0, index = 0;
+        LinkedList<Integer> keyList = new LinkedList<>();
+        HashMap<Integer, Integer> map = new HashMap<>();
         for (int i = 0; i < operators.length; i++) {
             if (operators[i][0] == 2) {
                 length++;
             }
         }
         int[] result = new int[length];
-        Map<Integer, Integer> map = new HashMap();
-        List<Integer> list = new ArrayList();
         for (int i = 0; i < operators.length; i++) {
-            if (operators[i][0] == 1) {
-                int key = operators[i][1];
+            int opt = operators[i][0];
+            int key = operators[i][1];
+            // put(key,value)
+            if (opt == 1) {
                 int value = operators[i][2];
                 if (map.size() < k) {
                     map.put(key, value);
-                    if (list.contains(key)) {
-                        list.remove((Integer) key);
+                    if (keyList.contains(key)) {
+                        keyList.remove(key);
                     }
-                    list.add(key);
-
+                    keyList.addLast(key);
                 } else {
-                    if (list.contains(key)) {
-                        list.remove((Integer) key);
-                        list.add(key);
+                    // 此时map已经满了
+                    // 如果此时map里面已经有了这个key，那么不需要put进map中了
+                    if (map.containsKey(key)) {
+                        keyList.remove(key);
+                        keyList.addLast(key);
                     } else {
-                        int get_key = list.remove(0);
-                        map.remove(get_key);
-                        list.add(key);
+                        Integer font = keyList.removeFirst();
+                        map.remove(font);
                         map.put(key, value);
+                        keyList.addLast(key);
                     }
                 }
-            } else if (operators[i][0] == 2) {
-                int check_key = operators[i][1];
-                if (!map.containsKey(check_key)) {
+            }
+            // get(key)
+            else {
+                if (map.containsKey(key) == false) {
                     result[index] = -1;
                 } else {
-                    result[index] = map.get(check_key);
-                    list.remove((Integer) check_key);
-                    list.add(check_key);
+                    // 确定Map里面有这个key了，那么此时keyList一定有这个key
+                    // 此时不需要移除第一个元素，而是找到这个key的位置，给他置于末尾
+                    result[index] = map.get(key);
+                    keyList.remove((Integer) key);
+                    keyList.addLast((Integer) key);
                 }
                 index++;
             }
